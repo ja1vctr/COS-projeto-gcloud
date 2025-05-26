@@ -1,4 +1,4 @@
-# Etapa 1: Build da aplicação
+# Stage 1: Build Angular
 FROM node:18 as build
 
 WORKDIR /app
@@ -9,18 +9,12 @@ RUN npm ci
 COPY . .
 RUN npm run build -- --output-path=dist
 
-# Etapa 2: Servir os arquivos com NGINX
+# Stage 2: Servir com nginx
 FROM nginx:alpine
 
-# Remove configuração default do nginx
 RUN rm -rf /usr/share/nginx/html/*
 
-# Copia os arquivos Angular buildados para a pasta pública do nginx
-COPY --from=build /app/dist/cos-projeto-gcloud /usr/share/nginx/html
+COPY --from=build /app/dist/cos-projeto /usr/share/nginx/html
 
-# Copia uma configuração customizada do nginx (opcional)
+# Opcional: copiar configuração customizada do nginx
 # COPY nginx.conf /etc/nginx/nginx.conf
-
-EXPOSE 80
-
-CMD ["nginx", "-g", "daemon off;"]
