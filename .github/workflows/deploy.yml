@@ -1,0 +1,39 @@
+name: Deploy to Cloud Run
+
+on:
+  push:
+    branches:
+      - main # ou a branch que você usa para produção
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Angular project
+        run: npm run build
+
+      - name: Set up Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
+        with:
+          project_id: cos-projeto
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
+          export_default_credentials: true
+
+      - name: Deploy to Cloud Run
+        uses: google-github-actions/deploy-cloudrun@v1
+        with:
+          service: cos-projeto-service
+          region: us-central1
+          source: .
